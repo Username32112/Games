@@ -1,4 +1,4 @@
-// ======= Sample Data =======
+// ======= Users, Items, Orders =======
 let users = [
   {email:"pokhrelryan303@gmail.com", password:"pokhrel1@", role:"admin"},
   {email:"worker1@gmail.com", password:"worker123", role:"worker"},
@@ -10,7 +10,7 @@ let items = [
   {id:2, name:"Shield", addedBy:"worker1", stock:3}
 ];
 
-let orders = []; // customer orders
+let orders = [];
 let currentUser = null;
 
 // ======= LOGIN FUNCTION =======
@@ -18,10 +18,8 @@ function login() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
   const user = users.find(u => u.email === email && u.password === password);
-  if(!user){
-    document.getElementById("error").innerText = "Invalid email or password";
-    return;
-  }
+  if(!user) return document.getElementById("error").innerText = "Invalid email or password";
+  
   currentUser = user;
 
   if(user.role === "admin") window.location.href = "admin.html";
@@ -29,60 +27,46 @@ function login() {
   else window.location.href = "customer.html";
 }
 
-// ======= HELPER FUNCTIONS =======
-
-// Add new worker (Admin only)
+// ======= ADMIN FUNCTIONS =======
 function addWorker(email, password){
   if(!email || !password) return alert("Enter email and password");
   users.push({email,password,role:"worker"});
-  alert("Worker added!");
+  renderWorkers();
 }
 
-// Add new item (Worker)
+function removeWorker(index){
+  if(confirm("Remove this worker?")){
+    users.splice(index,1);
+    renderWorkers();
+  }
+}
+
+function renderWorkers(){
+  const tbody = document.getElementById("workersTable");
+  if(!tbody) return;
+  tbody.innerHTML = "";
+  users.forEach((u,i)=>{
+    if(u.role === "worker"){
+      tbody.innerHTML += `<tr>
+        <td>${u.email}</td>
+        <td>
+          <button onclick="removeWorker(${i})">Remove</button>
+        </td>
+      </tr>`;
+    }
+  });
+}
+
+// ======= WORKER FUNCTIONS =======
 function addItem(name){
   if(!name) return alert("Enter item name");
   let id = items.length + 1;
   items.push({id,name,addedBy: currentUser.email, stock:5});
   alert("Item added!");
-  renderItems(); // update table if on customer page
-  renderOrders(); // update table if on worker/admin page
-}
-
-// Customer orders item
-function orderItem(itemId){
-  let item = items.find(i=>i.id===itemId);
-  if(!item || item.stock<=0) return alert("Item not available");
-  item.stock -=1;
-  orders.push({customer: currentUser.email, item:item.name, shipping:"Pending"});
-  alert("Ordered "+item.name);
   renderItems();
   renderOrders();
 }
 
-// Update shipping info (Worker/Admin)
-function updateShipping(index, status){
-  if(!orders[index]) return alert("Invalid order");
-  orders[index].shipping = status;
-  alert("Shipping updated");
-  renderOrders();
-}
-
-// Render items table (Customer dashboard)
-function renderItems(){
-  const tbody = document.getElementById("itemsTable");
-  if(!tbody) return;
-  tbody.innerHTML = "";
-  items.forEach((i)=>{
-    tbody.innerHTML += `<tr>
-      <td>${i.name}</td>
-      <td>${i.addedBy}</td>
-      <td>${i.stock}</td>
-      <td><button onclick="orderItem(${i.id})">Order</button></td>
-    </tr>`;
-  });
-}
-
-// Render orders table (Admin & Worker dashboards)
 function renderOrders(){
   const tbody = document.getElementById("ordersTable");
   if(!tbody) return;
@@ -98,4 +82,35 @@ function renderOrders(){
       </td>
     </tr>`;
   });
+}
+
+function updateShipping(index, status){
+  if(!orders[index]) return alert("Invalid order");
+  orders[index].shipping = status;
+  renderOrders();
+}
+
+// ======= CUSTOMER FUNCTIONS =======
+function renderItems(){
+  const tbody = document.getElementById("itemsTable");
+  if(!tbody) return;
+  tbody.innerHTML = "";
+  items.forEach((i)=>{
+    tbody.innerHTML += `<tr>
+      <td>${i.name}</td>
+      <td>${i.addedBy}</td>
+      <td>${i.stock}</td>
+      <td><button onclick="orderItem(${i.id})">Order</button></td>
+    </tr>`;
+  });
+}
+
+function orderItem(itemId){
+  let item = items.find(i=>i.id===itemId);
+  if(!item || item.stock <=0) return alert("Item not available");
+  item.stock -=1;
+  orders.push({customer: currentUser.email, item:item.name, shipping:"Pending"});
+  alert("Ordered "+item.name);
+  renderItems();
+  renderOrders();
 }
