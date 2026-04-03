@@ -9,10 +9,21 @@
 <div class="dashboard-container">
 <h1>Worker Dashboard</h1>
 
-<h2>Add New Item</h2>
-<input type="text" id="itemName" placeholder="Item Name">
-<button onclick="addItem(document.getElementById('itemName').value)">Add Item</button>
+<!-- Add Item -->
+<div class="card">
+  <h2>Add New Item</h2>
+  <input type="text" id="itemName" placeholder="Item Name">
+  <input type="number" id="itemStock" placeholder="Initial Stock" min="1">
+  <button onclick="addItem(document.getElementById('itemName').value, document.getElementById('itemStock').value)">Add Item</button>
+</div>
 
+<!-- Worker Items -->
+<h2>Your Items</h2>
+<div id="workerItems" class="grid-container">
+<!-- Populated by JS -->
+</div>
+
+<!-- Orders Table -->
 <h2>Orders</h2>
 <table>
   <thead>
@@ -20,9 +31,12 @@
   </thead>
   <tbody id="ordersTable"></tbody>
 </table>
-</div>
 
+</div>
 <script src="script.js"></script>
-<script>renderOrders();</script>
+<script>
+renderWorkerItems();
+renderOrders();
+</script>
 </body>
 </html>
