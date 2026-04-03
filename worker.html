@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Worker Dashboard</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<h1>Worker Dashboard</h1>
+
+<h2>Add Item</h2>
+<input type="text" id="itemName" placeholder="Item Name">
+<button onclick="addItem(document.getElementById('itemName').value)">Add Item</button>
+
+<h2>Orders</h2>
+<table>
+  <thead>
+    <tr><th>Customer</th><th>Item</th><th>Shipping</th><th>Update Shipping</th></tr>
+  </thead>
+  <tbody id="ordersTable"></tbody>
+</table>
+
+<script src="script.js"></script>
+<script>renderOrders();</script>
+</body>
+</html>
