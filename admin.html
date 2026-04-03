@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Dashboard</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<h1>Admin Dashboard</h1>
+
+<h2>Manage Workers</h2>
+<input type="email" id="newWorkerEmail" placeholder="Worker Email">
+<input type="password" id="newWorkerPass" placeholder="Worker Password">
+<button onclick="addWorker(document.getElementById('newWorkerEmail').value, document.getElementById('newWorkerPass').value)">Add Worker</button>
+
+<h2>All Orders</h2>
+<table>
+  <thead>
+    <tr><th>Customer</th><th>Item</th><th>Shipping</th><th>Update Shipping</th></tr>
+  </thead>
+  <tbody id="ordersTable"></tbody>
+</table>
+
+<script src="script.js"></script>
+<script>renderOrders();</script>
+</body>
+</html>
