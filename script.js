@@ -1,110 +1,101 @@
-// Sample initial data
-let data = {
-  players: {
-    "Ryan": ["Sword", "Shield"],
-    "Alex": ["Bow"]
-  },
-  logs: []
-};
+// ======= Sample Data =======
+let users = [
+  {email:"pokhrelryan303@gmail.com", password:"pokhrel1@", role:"admin"},
+  {email:"worker1@gmail.com", password:"worker123", role:"worker"},
+  {email:"customer1@gmail.com", password:"cust123", role:"customer"}
+];
 
-// DOM references
-const playersTable = document.querySelector("#playersTable tbody");
-const logsTable = document.querySelector("#logsTable tbody");
-const modal = document.getElementById("modal");
-const modalBody = document.getElementById("modalBody");
-const closeModal = document.querySelector(".close");
+let items = [
+  {id:1, name:"Sword", addedBy:"worker1", stock:5},
+  {id:2, name:"Shield", addedBy:"worker1", stock:3}
+];
 
-closeModal.onclick = () => modal.style.display = "none";
+let orders = []; // customer orders
+let currentUser = null;
 
-// Render players dashboard
-function renderPlayers() {
-  playersTable.innerHTML = "";
-  for (let player in data.players) {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${player}</td>
-      <td>${data.players[player].join(", ") || "-"}</td>
-      <td>
-        <button onclick="openAddItem('${player}')">Add Item</button>
-        <button onclick="openShipItem('${player}')">Ship Item</button>
-      </td>
-    `;
-    playersTable.appendChild(row);
+// ======= LOGIN FUNCTION =======
+function login() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const user = users.find(u => u.email === email && u.password === password);
+  if(!user){
+    document.getElementById("error").innerText = "Invalid email or password";
+    return;
   }
+  currentUser = user;
+
+  if(user.role === "admin") window.location.href = "admin.html";
+  else if(user.role === "worker") window.location.href = "worker.html";
+  else window.location.href = "customer.html";
 }
 
-// Render logs
-function renderLogs() {
-  logsTable.innerHTML = "";
-  data.logs.forEach(log => {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${log.player}</td>
-      <td>${log.action}</td>
-      <td>${log.item}</td>
-      <td>${log.to || "-"}</td>
-      <td>${log.date}</td>
-    `;
-    logsTable.appendChild(row);
+// ======= HELPER FUNCTIONS =======
+
+// Add new worker (Admin only)
+function addWorker(email, password){
+  if(!email || !password) return alert("Enter email and password");
+  users.push({email,password,role:"worker"});
+  alert("Worker added!");
+}
+
+// Add new item (Worker)
+function addItem(name){
+  if(!name) return alert("Enter item name");
+  let id = items.length + 1;
+  items.push({id,name,addedBy: currentUser.email, stock:5});
+  alert("Item added!");
+  renderItems(); // update table if on customer page
+  renderOrders(); // update table if on worker/admin page
+}
+
+// Customer orders item
+function orderItem(itemId){
+  let item = items.find(i=>i.id===itemId);
+  if(!item || item.stock<=0) return alert("Item not available");
+  item.stock -=1;
+  orders.push({customer: currentUser.email, item:item.name, shipping:"Pending"});
+  alert("Ordered "+item.name);
+  renderItems();
+  renderOrders();
+}
+
+// Update shipping info (Worker/Admin)
+function updateShipping(index, status){
+  if(!orders[index]) return alert("Invalid order");
+  orders[index].shipping = status;
+  alert("Shipping updated");
+  renderOrders();
+}
+
+// Render items table (Customer dashboard)
+function renderItems(){
+  const tbody = document.getElementById("itemsTable");
+  if(!tbody) return;
+  tbody.innerHTML = "";
+  items.forEach((i)=>{
+    tbody.innerHTML += `<tr>
+      <td>${i.name}</td>
+      <td>${i.addedBy}</td>
+      <td>${i.stock}</td>
+      <td><button onclick="orderItem(${i.id})">Order</button></td>
+    </tr>`;
   });
 }
 
-// Modal forms
-function openAddItem(player) {
-  modalBody.innerHTML = `
-    <h3>Add Item to ${player}</h3>
-    <input type="text" id="itemName" placeholder="Item Name">
-    <button onclick="addItem('${player}')">Add</button>
-  `;
-  modal.style.display = "block";
+// Render orders table (Admin & Worker dashboards)
+function renderOrders(){
+  const tbody = document.getElementById("ordersTable");
+  if(!tbody) return;
+  tbody.innerHTML = "";
+  orders.forEach((o,i)=>{
+    tbody.innerHTML += `<tr>
+      <td>${o.customer}</td>
+      <td>${o.item}</td>
+      <td>${o.shipping}</td>
+      <td>
+        <input type="text" id="status${i}" placeholder="New Status">
+        <button onclick="updateShipping(${i}, document.getElementById('status${i}').value)">Update</button>
+      </td>
+    </tr>`;
+  });
 }
-
-function addItem(player) {
-  const itemName = document.getElementById("itemName").value;
-  if (!itemName) return alert("Enter an item name");
-  data.players[player].push(itemName);
-  data.logs.push({player, action:"Added", item:itemName, date: new Date().toLocaleString()});
-  modal.style.display = "none";
-  renderPlayers();
-  renderLogs();
-}
-
-function openShipItem(player) {
-  let items = data.players[player];
-  if (items.length === 0) return alert("No items to ship");
-  let playerOptions = Object.keys(data.players).filter(p => p !== player);
-  modalBody.innerHTML = `
-    <h3>Ship Item from ${player}</h3>
-    <select id="itemSelect">
-      ${items.map(i => `<option value="${i}">${i}</option>`).join('')}
-    </select>
-    <select id="toPlayer">
-      ${playerOptions.map(p => `<option value="${p}">${p}</option>`).join('')}
-    </select>
-    <button onclick="shipItem('${player}')">Ship</button>
-  `;
-  modal.style.display = "block";
-}
-
-function shipItem(fromPlayer) {
-  const item = document.getElementById("itemSelect").value;
-  const toPlayer = document.getElementById("toPlayer").value;
-
-  // Remove from sender
-  const idx = data.players[fromPlayer].indexOf(item);
-  if (idx > -1) data.players[fromPlayer].splice(idx, 1);
-
-  // Add to receiver
-  data.players[toPlayer].push(item);
-
-  // Log action
-  data.logs.push({player: fromPlayer, action:"Shipped", item, to: toPlayer, date: new Date().toLocaleString()});
-
-  modal.style.display = "none";
-  renderPlayers();
-  renderLogs();
-}
-
-// Initial render
-renderPlayers();
-renderLogs();
