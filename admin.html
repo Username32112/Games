@@ -6,6 +6,7 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div class="dashboard-container">
 <h1>Admin Dashboard</h1>
 
 <h2>Manage Workers</h2>
@@ -13,15 +14,26 @@
 <input type="password" id="newWorkerPass" placeholder="Worker Password">
 <button onclick="addWorker(document.getElementById('newWorkerEmail').value, document.getElementById('newWorkerPass').value)">Add Worker</button>
 
+<table>
+  <thead>
+    <tr><th>Worker Email</th><th>Action</th></tr>
+  </thead>
+  <tbody id="workersTable"></tbody>
+</table>
+
 <h2>All Orders</h2>
 <table>
   <thead>
-    <tr><th>Customer</th><th>Item</th><th>Shipping</th><th>Update Shipping</th></tr>
+    <tr><th>Customer</th><th>Item</th><th>Shipping</th><th>Update</th></tr>
   </thead>
   <tbody id="ordersTable"></tbody>
 </table>
+</div>
 
 <script src="script.js"></script>
-<script>renderOrders();</script>
+<script>
+renderWorkers();
+renderOrders();
+</script>
 </body>
 </html>
