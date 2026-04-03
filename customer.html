@@ -9,16 +9,19 @@
 <div class="dashboard-container">
 <h1>Customer Dashboard</h1>
 
-<h2>Available Items</h2>
-<table>
-  <thead>
-    <tr><th>Item</th><th>Added By</th><th>Stock</th><th>Order</th></tr>
-  </thead>
-  <tbody id="itemsTable"></tbody>
-</table>
+<div id="itemsTable" class="grid-container">
+<!-- Items cards populated by JS -->
 </div>
 
+<div id="orderHistory">
+<!-- Order history populated by JS -->
+</div>
+
+</div>
 <script src="script.js"></script>
-<script>renderItems();</script>
+<script>
+renderItems();
+renderOrderHistory();
+</script>
 </body>
 </html>
